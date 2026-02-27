@@ -1,59 +1,319 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PHP_Laravel12_Get_User_Wise_Data_Using_API
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+    <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" />
+    <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" />
+    <img src="https://img.shields.io/badge/API-RESTful-0EA5E9?style=for-the-badge&logo=postman&logoColor=white" />
+    <img src="https://img.shields.io/badge/User--Wise-Data-9333EA?style=for-the-badge&logo=databricks&logoColor=white" />
+    <img src="https://img.shields.io/badge/Database-MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+    <img src="https://img.shields.io/badge/Auth-Demo%20API-16A34A?style=for-the-badge&logo=shield&logoColor=white" />
 </p>
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+This project demonstrates how to implement a **User-Wise Data Retrieval API** using **Laravel 12**. Each record is stored with a `created_by` field (customer ID), and the API fetches data based on the provided customer ID. This example is ideal for beginners who want to understand Laravel API basics, database relationships, and filtering data user-wise.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+* Laravel 12 fresh installation
+* MySQL database configuration
+* Notes table with `created_by` (customer ID)
+* Manual data insertion using Tinker
+* REST API to fetch customer-wise data
+* Clean JSON API responses
+* Simple and beginner-friendly structure
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Folder Structure
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+user-wise-api/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── Api/
+│   │           └── NoteController.php
+│   └── Models/
+│       └── Note.php
+├── database/
+│   └── migrations/
+│       └── xxxx_xx_xx_create_notes_table.php
+├── routes/
+│   ├── api.php
+│   └── web.php
+├── .env
+├── composer.json
+└── README.md
+```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 1. Laravel 12 Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Create a new Laravel 12 project
+composer create-project laravel/laravel user-wise-api
 
-## Code of Conduct
+# Move into project directory
+cd user-wise-api
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Start the development server
+php artisan serve
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 2. Database Configuration
 
-## License
+### 2.1 Create Database
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Create a database manually in MySQL:
+
+```sql
+CREATE DATABASE userwise_db;
+```
+
+### 2.2 Update .env File
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=userwise_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+---
+
+## 3. Notes Table Migration (created_by = customer id)
+
+### 3.1 Create Migration
+
+```bash
+php artisan make:migration create_notes_table
+```
+
+### 3.2 Migration File
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('notes', function (Blueprint $table) {
+            $table->id(); // Primary key
+            $table->string('title'); // Note title
+            $table->text('description')->nullable(); // Note description
+            $table->unsignedBigInteger('created_by'); // Customer ID
+            $table->timestamps(); // created_at & updated_at
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('notes'); // Drop table on rollback
+    }
+};
+```
+
+### 3.3 Run Migration
+
+```bash
+php artisan migrate
+```
+
+---
+
+## 4. Note Model
+
+### 4.1 Create Model
+
+```bash
+php artisan make:model Note
+```
+
+### 4.2 Model File
+
+**app/Models/Note.php**
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Note extends Model
+{
+    // Mass assignable fields
+    protected $fillable = [
+        'title',
+        'description',
+        'created_by'
+    ];
+}
+```
+
+---
+
+## 5. Insert Data Manually (Using Tinker)
+
+```bash
+# Open tinker shell
+php artisan tinker
+```
+
+```php
+use App\Models\Note;
+
+// Insert note for customer 1
+Note::create([
+    'title' => 'Customer 1 Note',
+    'description' => 'First data',
+    'created_by' => 1
+]);
+
+// Insert note for customer 2
+Note::create([
+    'title' => 'Customer 2 Note',
+    'description' => 'Second data',
+    'created_by' => 2
+]);
+
+// Insert note for customer 3
+Note::create([
+    'title' => 'Customer 3 Note',
+    'description' => 'More data',
+    'created_by' => 2
+]);
+```
+
+Exit tinker:
+
+```bash
+exit
+```
+<img width="948" height="289" alt="Screenshot 2026-01-13 151809" src="https://github.com/user-attachments/assets/c75b4a94-508d-4327-ad73-4fa6a0740ecc" />
+
+---
+
+## 6. API Controller
+
+### 6.1 Create Controller
+
+```bash
+php artisan make:controller Api/NoteController
+```
+
+### 6.2 Controller Code
+
+**app/Http/Controllers/Api/NoteController.php**
+
+```php
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Note;
+
+class NoteController extends Controller
+{
+    public function listByCustomer(Request $request)
+    {
+        // Get customer_id from query string
+        $customerId = $request->query('customer_id');
+
+        // Validate customer_id
+        if (!$customerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'customer_id is required'
+            ], 400);
+        }
+
+        // Fetch notes created by specific customer
+        $notes = Note::where('created_by', $customerId)->get();
+
+        // Return JSON response
+        return response()->json([
+            'status' => true,
+            'customer_id' => $customerId,
+            'data' => $notes
+        ]);
+    }
+}
+```
+
+---
+
+## 7. API Route File
+
+**routes/api.php**
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\NoteController;
+
+// Customer-wise notes API
+Route::get('/notes', [NoteController::class, 'listByCustomer']);
+```
+
+---
+
+## 8. API Testing
+
+### 8.1 API URL
+
+```
+GET http://127.0.0.1:8000/api/notes?customer_id=1
+```
+
+### 8.2 API Response
+
+```json
+{
+    "status": true,
+    "customer_id": "1",
+    "data": [
+        {
+            "id": 1,
+            "title": "Customer 1 Note",
+            "description": "First data",
+            "created_by": 1,
+            "created_at": "2026-01-13T09:25:35.000000Z",
+            "updated_at": "2026-01-13T09:25:35.000000Z"
+        }
+    ]
+}
+```
+<img width="967" height="824" alt="Screenshot 2026-01-13 151733" src="https://github.com/user-attachments/assets/f3da3a55-a927-43b1-8ce9-8907bcb26bea" />
+
+<img width="921" height="815" alt="Screenshot 2026-01-13 154212" src="https://github.com/user-attachments/assets/1f65ae7b-73c9-4a95-a5c4-6f29494a164c" />
+
+
+---
+
+## 9. Important Notes
+
+* This is a **demo API** using `customer_id` as a request parameter.
+* In real applications, use **Laravel Sanctum authentication**.
+* Prefer `$request->user()->id` instead of passing customer_id from frontend.
+
+---
+
