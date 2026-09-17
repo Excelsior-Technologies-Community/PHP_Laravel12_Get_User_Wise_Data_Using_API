@@ -127,6 +127,18 @@ class NoteController extends Controller
                 ->whereMonth('created_at', now()->month);
         }
 
+        // Priority filter
+        $priority = $request->query('priority');
+        if (!empty($priority)) {
+            $query->where('priority', strtolower($priority));
+        }
+
+        // Category filter
+        $category = $request->query('category');
+        if (!empty($category)) {
+            $query->where('category', $category);
+        }
+
         // Sorting
         $notes = $query
             ->orderBy($sortBy, $sortDirection)
@@ -605,5 +617,155 @@ class NoteController extends Controller
         }
 
         return (int) $customerId;
+    }
+
+
+    /**
+     * ============================================================
+     * CRUD: CREATE NEW NOTE FOR CUSTOMER
+     * ============================================================
+     * POST /api/notes
+     */
+    public function store(Request $request)
+    {
+        $customerId = $request->input('created_by') ?? $request->input('customer_id');
+
+        if (!$customerId || !is_numeric($customerId) || $customerId <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Valid created_by / customer_id is required'
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|min:2|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'nullable|string|in:high,medium,low',
+            'category' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+            'is_pinned' => 'nullable|boolean',
+        ]);
+
+        $note = Note::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? '',
+            'created_by' => (int) $customerId,
+            'priority' => $validated['priority'] ?? 'medium',
+            'category' => $validated['category'] ?? 'General',
+            'color' => $validated['color'] ?? ($validated['priority'] === 'high' ? '#ef4444' : ($validated['priority'] === 'medium' ? '#f59e0b' : '#38bdf8')),
+            'is_pinned' => $validated['is_pinned'] ?? false,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Note created successfully for customer #' . $customerId,
+            'data' => $note
+        ], 201);
+    }
+
+
+    /**
+     * ============================================================
+     * CRUD: UPDATE NOTE
+     * ============================================================
+     * PUT /api/notes/{id}
+     */
+    public function update(Request $request, $noteId)
+    {
+        if (!is_numeric($noteId) || $noteId <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid note ID'
+            ], 422);
+        }
+
+        $note = Note::find($noteId);
+
+        if (!$note) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Note not found'
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|min:2|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'nullable|string|in:high,medium,low',
+            'category' => 'nullable|string|max:50',
+            'color' => 'nullable|string|max:20',
+            'is_pinned' => 'nullable|boolean',
+        ]);
+
+        $note->update($validated);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Note #' . $noteId . ' updated successfully',
+            'data' => $note
+        ]);
+    }
+
+
+    /**
+     * ============================================================
+     * CRUD: DELETE NOTE
+     * ============================================================
+     * DELETE /api/notes/{id}
+     */
+    public function destroy(Request $request, $noteId)
+    {
+        if (!is_numeric($noteId) || $noteId <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid note ID'
+            ], 422);
+        }
+
+        $note = Note::find($noteId);
+
+        if (!$note) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Note not found'
+            ], 404);
+        }
+
+        $note->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Note #' . $noteId . ' deleted successfully'
+        ]);
+    }
+
+
+    /**
+     * ============================================================
+     * GET ALL CUSTOMERS WITH STATS
+     * ============================================================
+     * GET /api/customers
+     */
+    public function customersList(Request $request)
+    {
+        $users = \App\Models\User::all();
+        $counts = Note::select('created_by', DB::raw('count(*) as total'))
+            ->groupBy('created_by')
+            ->pluck('total', 'created_by')
+            ->toArray();
+
+        $data = $users->map(function ($u) use ($counts) {
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'total_notes' => $counts[$u->id] ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 }
