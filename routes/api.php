@@ -63,6 +63,26 @@ Route::get('/notes/{noteId}', [
     'showCustomerNote'
 ]);
 
+Route::post('/notes', [
+    NoteController::class,
+    'store'
+]);
+
+Route::put('/notes/{noteId}', [
+    NoteController::class,
+    'update'
+]);
+
+Route::delete('/notes/{noteId}', [
+    NoteController::class,
+    'destroy'
+]);
+
+Route::get('/customers', [
+    NoteController::class,
+    'customersList'
+]);
+
 Route::get('/customers/note-counts', [
     NoteController::class,
     'customerNoteCounts'
